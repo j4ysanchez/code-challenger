@@ -1,17 +1,14 @@
 <!--
 Sync Impact Report
 ==================
-Version change: (template) → 1.0.0
-Modified principles: N/A (initial ratification)
+Version change: 1.1.0 → 1.2.0
+Modified principles: none renamed
 Added sections:
-  - Core Principles (I–V)
-  - Security Requirements
-  - Development Workflow & Quality Gates
-  - Governance
-Removed sections: none (all template placeholders filled)
+  - Core Principles → VI. Vertical Slice Architecture (new principle)
+Removed sections: none
 Templates requiring updates:
-  - ✅ .specify/templates/plan-template.md — generic "Constitution Check" gate is
-    compatible; gates below apply per-feature, no edit required
+  - ✅ .specify/templates/plan-template.md — Constitution Check gate picks up the new
+    principle per-feature; project-structure guidance remains advisory, no edit required
   - ✅ .specify/templates/spec-template.md — no constitution-specific references
   - ✅ .specify/templates/tasks-template.md — no constitution-specific references
   - ✅ .specify/templates/checklist-template.md — no constitution-specific references
@@ -113,6 +110,30 @@ Security properties MUST be verified by tests and observable in production.
 **Rationale**: Untested security controls decay silently. Logs and audits turn a breach
 from an unknowable event into an investigable one.
 
+### VI. Vertical Slice Architecture
+
+Code is organized by feature, not by technical layer.
+
+- Each feature (e.g., submit-solution, list-problems, register-account) MUST live in
+  its own slice containing everything the feature needs — request handling,
+  validation, domain logic, and data access — colocated under one feature directory.
+- Slices MUST NOT call into other slices' internals. Cross-slice needs are met through
+  shared kernel/domain primitives or explicitly published contracts, never by reaching
+  into another feature's modules.
+- Shared abstractions (base classes, generic repositories, layer-wide services) MUST
+  NOT be introduced speculatively; extract shared code only after duplication is
+  observed in two or more slices and the extraction is justified in the PR.
+- A slice MUST be independently testable end-to-end: its tests exercise the feature
+  from its entry point to its effects without requiring other slices.
+- Trust boundaries still hold across slices: the sandbox/execution isolation
+  (Principle I) and per-service least privilege (Principle II) are system boundaries
+  that no slice organization may blur.
+
+**Rationale**: Vertical slices keep each feature's full behavior — including its
+validation and authorization — visible and reviewable in one place, which is exactly
+where security review needs it. They also match this project's spec-driven workflow:
+each spec's user stories map one-to-one onto independently testable slices.
+
 ## Security Requirements
 
 Baseline requirements for the web application, independent of the execution engine:
@@ -135,6 +156,29 @@ Baseline requirements for the web application, independent of the execution engi
 
 ## Development Workflow & Quality Gates
 
+### Engineering Discipline
+
+- **Pure functional programming**: Application logic MUST be written in a pure
+  functional style — functions are deterministic, avoid shared mutable state, and have
+  no hidden side effects. Effects (I/O, database access, sandbox invocation, clock,
+  randomness) MUST be isolated at the edges of the system behind explicit interfaces,
+  keeping core domain logic pure and testable in isolation.
+- **Immutable data structures**: Data MUST be modeled with immutable structures by
+  default; state changes produce new values rather than mutating existing ones.
+  Mutation is permitted only where a measured performance need requires it, confined to
+  a narrow local scope, and justified in the PR description.
+- **Test-driven development (NON-NEGOTIABLE)**: All production code MUST be developed
+  test-first: write a failing test, make it pass with the minimal implementation, then
+  refactor. PRs MUST show tests covering the new behavior; code merged without
+  accompanying tests written against its requirements violates this constitution. This
+  generalizes Principle V's execution-path mandate to the entire codebase.
+
+**Rationale**: A platform that runs hostile code cannot afford ambient mutable state or
+untested paths — purity and immutability shrink the attack and defect surface, and TDD
+keeps the security guarantees continuously verified.
+
+### Quality Gates
+
 - Every PR MUST pass CI (tests, SAST, dependency scan) before merge.
 - Changes touching the execution service, sandbox configuration, authentication, or
   authorization are **security-relevant** and MUST receive an explicit security-focused
@@ -143,7 +187,7 @@ Baseline requirements for the web application, independent of the execution engi
   resource limits, and malicious-payload test fixtures — no runtime is enabled by
   configuration alone.
 - The plan-phase "Constitution Check" gate MUST evaluate each feature against
-  Principles I–V; violations require an entry in the plan's Complexity Tracking table
+  Principles I–VI; violations require an entry in the plan's Complexity Tracking table
   with justification.
 
 ## Governance
@@ -160,4 +204,4 @@ exceptions.
   point; unjustified violations block implementation. Security-relevant changes (see
   Workflow) require review evidence in the PR.
 
-**Version**: 1.0.0 | **Ratified**: 2026-07-16 | **Last Amended**: 2026-07-16
+**Version**: 1.2.0 | **Ratified**: 2026-07-16 | **Last Amended**: 2026-07-16
