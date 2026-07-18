@@ -1,0 +1,14 @@
+{
+  "name": "@code-challenger/worker",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "dev": "node -e \"console.log('apps/worker dev process not implemented yet (see tasks.md Phase 2/3)')\""
+  },
+  "dependencies": {
+    "@code-challenger/contracts": "*"
+  }
+}

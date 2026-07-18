@@ -18,7 +18,7 @@ shapes and limits live in [data-model.md](data-model.md),
 ```bash
 npm install                          # workspace install
 cp .env.example .env                 # local secrets (never committed)
-docker compose -f infra/docker-compose.yml up -d postgres
+npm run db:up                        # postgres via infra/docker-compose.yml (--env-file .env)
 npm run db:migrate                   # kysely migrations + role grants (infra/db)
 npm run db:seed                      # seed admin user + 2 sample problems
 docker build -t sandbox-python312 infra/sandbox/python312
