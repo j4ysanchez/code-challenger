@@ -13,7 +13,7 @@
     "apps/web"
   ],
   "scripts": {
-    "typecheck": "npm run typecheck --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present && tsc -p infra/db/tsconfig.json --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
     "test:hostile": "vitest run --project hostile",
@@ -34,5 +34,9 @@
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.18.0",
     "vitest": "^4.1.10"
+  },
+  "dependencies": {
+    "kysely": "^0.29.4",
+    "pg": "^8.22.0"
   }
 }
