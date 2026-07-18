@@ -1,4 +1,7 @@
+import path from 'node:path';
 import { defineConfig } from 'vitest/config';
+
+const setupFiles = [path.resolve(import.meta.dirname, './vitest.setup.ts')];
 
 export default defineConfig({
   test: {
@@ -14,9 +17,19 @@ export default defineConfig({
       },
       {
         test: {
+          name: 'infra',
+          root: './infra/db',
+          environment: 'node',
+          setupFiles,
+          passWithNoTests: true,
+        },
+      },
+      {
+        test: {
           name: 'api',
           root: './apps/api',
           environment: 'node',
+          setupFiles,
           passWithNoTests: true,
         },
       },
@@ -27,6 +40,7 @@ export default defineConfig({
           environment: 'node',
           include: ['src/**/*.test.ts', 'tests/**/*.test.ts'],
           exclude: ['tests/hostile/**', 'node_modules/**'],
+          setupFiles,
           passWithNoTests: true,
         },
       },
@@ -36,6 +50,7 @@ export default defineConfig({
           root: './apps/worker',
           environment: 'node',
           include: ['tests/hostile/**/*.test.ts'],
+          setupFiles,
           passWithNoTests: true,
         },
       },
@@ -44,6 +59,7 @@ export default defineConfig({
           name: 'web',
           root: './apps/web',
           environment: 'jsdom',
+          setupFiles: [path.resolve(import.meta.dirname, './apps/web/vitest.setup.ts')],
           passWithNoTests: true,
         },
       },

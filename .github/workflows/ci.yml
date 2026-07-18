@@ -8,6 +8,30 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: code_challenger
+          POSTGRES_PASSWORD: ci_superuser_pw
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d code_challenger"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      POSTGRES_DB: code_challenger
+      POSTGRES_SUPERUSER_PASSWORD: ci_superuser_pw
+      DATABASE_URL_MIGRATOR: postgres://migrator_role:ci_migrator_pw@localhost:5432/code_challenger
+      DATABASE_URL_API: postgres://api_role:ci_api_pw@localhost:5432/code_challenger
+      DATABASE_URL_WORKER: postgres://worker_role:ci_worker_pw@localhost:5432/code_challenger
+      SESSION_COOKIE_SECRET: ci_session_cookie_secret_at_least_32_chars
+      API_PORT: 3000
+      WEB_PORT: 5173
+      APP_ORIGIN: http://localhost:5173
+      NODE_ENV: test
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -17,6 +41,7 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
+      - run: npm run db:migrate
       - run: npm test
       - run: npm audit --audit-level=critical
 
