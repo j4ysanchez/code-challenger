@@ -22,10 +22,13 @@ export interface AuthDeps {
   readonly config: Config;
 }
 
+/** Tighter than the global per-IP baseline — register/login are classic brute-force/enumeration targets. */
+const AUTH_RATE_LIMIT = { max: 10, timeWindow: '1 minute' };
+
 export const registerAuthRoutes = (app: App, deps: AuthDeps): void => {
   app.post(
     '/api/auth/register',
-    { preHandler: zodBodyValidator(registerRequestSchema) },
+    { preHandler: zodBodyValidator(registerRequestSchema), config: { rateLimit: AUTH_RATE_LIMIT } },
     async (request, reply) => {
       const body = getValidatedBody<{ email: string; password: string }>(request);
 
@@ -51,23 +54,27 @@ export const registerAuthRoutes = (app: App, deps: AuthDeps): void => {
     },
   );
 
-  app.post('/api/auth/login', { preHandler: zodBodyValidator(loginRequestSchema) }, async (request, reply) => {
-    const body = getValidatedBody<{ email: string; password: string }>(request);
+  app.post(
+    '/api/auth/login',
+    { preHandler: zodBodyValidator(loginRequestSchema), config: { rateLimit: AUTH_RATE_LIMIT } },
+    async (request, reply) => {
+      const body = getValidatedBody<{ email: string; password: string }>(request);
 
-    const row = await deps.db.selectFrom('users').selectAll().where('email', '=', body.email).executeTakeFirst();
-    const passwordValid = row ? await argon2.verify(row.password_hash, body.password) : false;
+      const row = await deps.db.selectFrom('users').selectAll().where('email', '=', body.email).executeTakeFirst();
+      const passwordValid = row ? await argon2.verify(row.password_hash, body.password) : false;
 
-    if (!row || !passwordValid) {
-      await writeAuditEvent(deps.db, { eventType: 'auth.login_failed', userId: row?.id ?? null, data: {} });
-      await reply.code(401).send(errorEnvelope('unauthorized', 'invalid email or password'));
-      return;
-    }
+      if (!row || !passwordValid) {
+        await writeAuditEvent(deps.db, { eventType: 'auth.login_failed', userId: row?.id ?? null, data: {} });
+        await reply.code(401).send(errorEnvelope('unauthorized', 'invalid email or password'));
+        return;
+      }
 
-    const session = await createSession(deps.db, row.id, deps.clock);
-    setSessionCookie(reply, session.id, deps.config);
-    await writeAuditEvent(deps.db, { eventType: 'auth.login', userId: row.id, data: {} });
-    await reply.send({ user: { id: row.id, email: row.email, role: row.role } });
-  });
+      const session = await createSession(deps.db, row.id, deps.clock);
+      setSessionCookie(reply, session.id, deps.config);
+      await writeAuditEvent(deps.db, { eventType: 'auth.login', userId: row.id, data: {} });
+      await reply.send({ user: { id: row.id, email: row.email, role: row.role } });
+    },
+  );
 
   app.post(
     '/api/auth/logout',

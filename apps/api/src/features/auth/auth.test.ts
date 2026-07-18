@@ -212,6 +212,34 @@ describe('POST /api/auth/login', () => {
       .executeTakeFirst();
     expect(auditRow).toBeDefined();
   });
+
+  it('rate-limits repeated login attempts more tightly than the global baseline (brute-force defense)', async () => {
+    const { app } = await buildTestApp();
+    const email = uniqueEmail();
+    await registerUser(app, email, 'correct-password');
+
+    const attempt = () =>
+      app.inject({
+        method: 'POST',
+        url: '/api/auth/login',
+        headers: withOrigin(),
+        payload: { email, password: 'wrong' },
+      });
+
+    const responses = await Array.from({ length: 11 }).reduce(
+      async (accPromise: Promise<Awaited<ReturnType<typeof attempt>>[]>) => {
+        const acc = await accPromise;
+        const response = await attempt();
+        return [...acc, response];
+      },
+      Promise.resolve([]),
+    );
+
+    const statusCodes = responses.map((r) => r.statusCode);
+    expect(statusCodes).toContain(429);
+    const limited = responses.find((r) => r.statusCode === 429);
+    expect(limited?.json()).toEqual({ error: { code: 'rate_limited', message: expect.any(String) } });
+  });
 });
 
 describe('GET /api/auth/me', () => {
