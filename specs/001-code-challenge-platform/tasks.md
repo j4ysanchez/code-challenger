@@ -24,12 +24,12 @@ npm-workspaces monorepo per plan.md: `packages/contracts/`, `apps/api/`, `apps/w
 
 **Purpose**: Monorepo skeleton, tooling, CI — everything that must exist before any code
 
-- [ ] T001 Create npm-workspaces monorepo root: `package.json` (workspaces `packages/contracts`, `apps/api`, `apps/worker`, `apps/web`; scripts `typecheck`, `lint`, `test`, `test:hostile`, `db:migrate`, `db:seed`, `dev:api`, `dev:worker`, `dev:web`), strict `tsconfig.base.json`, `.gitignore`, `.env.example`
-- [ ] T002 Scaffold the four workspaces with `package.json`, `tsconfig.json` extending the base, and empty `src/` in `packages/contracts/`, `apps/api/`, `apps/worker/`, `apps/web/`
-- [ ] T003 [P] Configure ESLint flat config with `eslint-plugin-functional` (no-let, immutable-data, no-throw in `kernel/` and `features/`) + typescript-eslint strict in `eslint.config.js`
-- [ ] T004 [P] Configure Vitest workspace (unit + integration projects per app, separate `hostile` project for `apps/worker/tests/hostile/`, jsdom + `@testing-library/react` environment for `apps/web`) in `vitest.workspace.ts`
-- [ ] T005 [P] Create `infra/docker-compose.yml` with `postgres:16` service (credentials from `.env`, named volume, healthcheck) and dev port mapping
-- [ ] T006 [P] Add GitHub Actions CI running typecheck, ESLint, Vitest, `npm audit --audit-level=critical`, and CodeQL in `.github/workflows/ci.yml`, plus a hostile-containment job that builds the sandbox images and runs `npm run test:hostile` via Docker-in-runner (job skips while `infra/sandbox/` is absent; MUST be green from T035 onward — constitution Principle V)
+- [X] T001 Create npm-workspaces monorepo root: `package.json` (workspaces `packages/contracts`, `apps/api`, `apps/worker`, `apps/web`; scripts `typecheck`, `lint`, `test`, `test:hostile`, `db:migrate`, `db:seed`, `dev:api`, `dev:worker`, `dev:web`), strict `tsconfig.base.json`, `.gitignore`, `.env.example`
+- [X] T002 Scaffold the four workspaces with `package.json`, `tsconfig.json` extending the base, and empty `src/` in `packages/contracts/`, `apps/api/`, `apps/worker/`, `apps/web/`
+- [X] T003 [P] Configure ESLint flat config with `eslint-plugin-functional` (no-let, immutable-data, no-throw in `kernel/` and `features/`) + typescript-eslint strict in `eslint.config.js`
+- [X] T004 [P] Configure Vitest workspace (unit + integration projects per app, separate `hostile` project for `apps/worker/tests/hostile/`, jsdom environment for `apps/web`) in `vitest.config.ts` (Vitest 4 replaced `vitest.workspace.ts` with a `test.projects` array in a single config — `@testing-library/react` itself is added in T019/T032 alongside React)
+- [X] T005 [P] Create `infra/docker-compose.yml` with `postgres:16` service (credentials from `.env`, named volume, healthcheck) and dev port mapping
+- [X] T006 [P] Add GitHub Actions CI running typecheck, ESLint, Vitest, `npm audit --audit-level=critical`, and CodeQL in `.github/workflows/ci.yml`, plus a hostile-containment job that builds the sandbox images and runs `npm run test:hostile` via Docker-in-runner (job skips while `infra/sandbox/` is absent; MUST be green from T035 onward — constitution Principle V)
 
 **Checkpoint**: `npm install`, `npm run typecheck`, `npm run lint`, `npm test` all run green on the empty skeleton
 

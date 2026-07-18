@@ -1,0 +1,13 @@
+{
+  "name": "@code-challenger/web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "dev": "node -e \"console.log('apps/web dev server not implemented yet (see tasks.md T019)')\""
+  },
+  "dependencies": {
+    "@code-challenger/contracts": "*"
+  }
+}
