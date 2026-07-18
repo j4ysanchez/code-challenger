@@ -36,7 +36,7 @@ Access: `api_role` only.
 
 | Column | Type | Constraints |
 |--------|------|-------------|
-| token_hash | text | PK (sha-256 of the token; raw token only ever e-mailed) |
+| token_hash | text | PK (sha-256 of the token; raw token delivered out-of-band per research R14, never stored) |
 | user_id | uuid | FK → users, NOT NULL |
 | expires_at | timestamptz | NOT NULL (1 hour) |
 | used_at | timestamptz | NULL until consumed (single-use) |

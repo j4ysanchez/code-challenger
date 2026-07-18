@@ -1,6 +1,6 @@
 # Implementation Plan: Code Challenge Platform (MVP)
 
-**Branch**: `main` | **Date**: 2026-07-16 | **Spec**: [spec.md](spec.md)
+**Branch**: `main` (feature `001-code-challenge-platform`) | **Date**: 2026-07-16 | **Spec**: [spec.md](spec.md)
 
 **Input**: Feature specification from `specs/001-code-challenge-platform/spec.md`
 

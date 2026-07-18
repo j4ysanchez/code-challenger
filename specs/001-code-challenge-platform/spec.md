@@ -14,10 +14,11 @@ and run safely against test cases."
 
 ### User Story 1 - Solve a Problem (Priority: P1)
 
-A visitor picks a programming problem from a catalog, reads its description, writes a
-solution in a supported language in an in-browser editor, submits it, and receives a
-verdict (Accepted, Wrong Answer, Time Limit Exceeded, Runtime Error, or Compile Error)
-with per-test-case feedback within seconds.
+A signed-in user picks a programming problem from a catalog, reads its description,
+writes a solution in a supported language in an in-browser editor, submits it, and
+receives a verdict (Accepted, Wrong Answer, Time Limit Exceeded, Memory Limit
+Exceeded, Runtime Error, Compile Error, or System Error) with per-test-case feedback
+within seconds.
 
 **Why this priority**: This is the core value proposition of the entire product. Without
 the browse → write → submit → verdict loop, nothing else on the site matters.
@@ -53,8 +54,10 @@ per problem — including verdicts, timestamps, and the code they submitted — 
 which problems they have solved.
 
 **Why this priority**: Progress tracking is the retention hook and is required to
-attribute submissions, rate-limit fairly, and audit activity. It depends on P1 existing
-but P1 can be demoed without it (anonymous session).
+attribute submissions, rate-limit fairly, and audit activity. Basic registration and
+sign-in ship as foundational work (FR-005 requires an authenticated user before any
+execution), so P1 can be demoed with seeded accounts; this story adds submission
+history, solved tracking, and password reset on top.
 
 **Independent Test**: Can be tested by registering an account, making several
 submissions, and verifying history shows the right submissions, verdicts, and solved
@@ -152,7 +155,8 @@ and solving it end-to-end.
   showing users a pending/running status, and MUST rate-limit submissions per user and
   per IP.
 - **FR-010**: System MUST render all user-produced content (submitted code, program
-  output, profile fields) as inert text in every view.
+  output, and any other user-supplied text; the MVP has no user-editable profile
+  fields) as inert text in every view.
 
 **Accounts & access control**
 
@@ -210,6 +214,9 @@ and solving it end-to-end.
   configuration-plus-sandbox-profile exercise per the constitution, not a redesign.
 - Authentication is email/password with standard session management; social login (OAuth)
   is out of scope for the MVP.
+- The MVP has no outbound email service: password-reset tokens are surfaced through a
+  structured server log for an operator to relay, not emailed. Introducing an email
+  provider later changes only the delivery mechanism, not the reset flow.
 - Contests, leaderboards, discussion forums, code comments/solutions sharing, premium
   tiers, and mobile-native apps are out of scope for the MVP.
 - Default resource limits apply when a problem does not override them (e.g., a few

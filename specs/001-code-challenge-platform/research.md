@@ -186,3 +186,19 @@ minimal-spend constraint.
   injected via Compose environment from an untracked `.env` file.
 - **Rationale**: Direct application of Principle II; the Docker socket is the crown
   jewel and is confined to the one service whose job is spawning sandboxes.
+
+## R14. Password-reset token delivery
+
+- **Decision**: For the MVP, the raw reset link/token is emitted as a dedicated
+  structured-log event (pino) on the API service — no outbound email. An operator
+  relays the link to the user on request. The token itself remains single-use,
+  hashed at rest, and 1-hour-expiring per R9, and is never returned in any API
+  response.
+- **Rationale**: The free-tier VM has no email infrastructure and a 1 GB/month
+  egress cap; MVP users are a friendly cohort. Swapping in a real sender later
+  changes only the delivery edge in the auth slice — the token flow, storage, and
+  endpoints are unchanged.
+- **Alternatives considered**: Transactional email SaaS (Resend/Mailgun/SendGrid
+  free tiers — adds an account, API secret, and deliverability setup; deferred until
+  there are real users), self-hosted SMTP on the VM (deliverability/reputation
+  burden far exceeds MVP value).
