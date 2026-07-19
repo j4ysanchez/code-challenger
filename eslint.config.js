@@ -41,4 +41,26 @@ export default tseslint.config(
       'functional/no-throw-statements': 'error',
     },
   },
+  {
+    // Tests must never send/subscribe to the real production pg-boss queues — doing so
+    // races any live `dev:worker`/`dev:api` process for the same jobs and makes the test
+    // flaky depending on what else happens to be running locally. Generate a unique
+    // per-test queue name instead (see apps/worker/tests/platform.test.ts).
+    files: ['**/*.test.ts', '**/*.test.tsx'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@code-challenger/contracts',
+              importNames: ['EVALUATION_QUEUE_NAME', 'EVALUATION_DEAD_LETTER_QUEUE_NAME'],
+              message:
+                'Do not use the shared production queue name in a test — it races any live worker process. Generate a unique name instead, e.g. `test-evaluate-${randomUUID()}`.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 );
