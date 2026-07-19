@@ -3,8 +3,8 @@ import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
 import { meResponseSchema } from '@code-challenger/contracts';
 import { apiFetch, ApiError } from './platform/api-client.js';
 import { getSession, setSession, useSession } from './platform/session.js';
-
-const CatalogPlaceholder = (): React.JSX.Element => <p>Problem catalog coming soon.</p>;
+import { CatalogPage } from './features/catalog/CatalogPage.js';
+import { ProblemPage } from './features/problem/ProblemPage.js';
 
 const Nav = (): React.JSX.Element => {
   const user = useSession();
@@ -39,7 +39,8 @@ const App = (): React.JSX.Element => {
     <BrowserRouter>
       <Nav />
       <Routes>
-        <Route path="/" element={<CatalogPlaceholder />} />
+        <Route path="/" element={<CatalogPage />} />
+        <Route path="/problems/:slug" element={<ProblemPage />} />
       </Routes>
     </BrowserRouter>
   );

@@ -10,6 +10,8 @@ export default tseslint.config(
       '**/build/**',
       '**/coverage/**',
       'infra/sandbox/**',
+      // Fixtures that run inside untrusted sandbox containers, not our own Node/TS build.
+      'apps/worker/tests/hostile/fixtures/**',
     ],
   },
   js.configs.recommended,

@@ -38,6 +38,24 @@ export const zodBodyValidator =
 export const getValidatedBody = <T>(request: FastifyRequest): T =>
   (request as FastifyRequest & { validatedBody: T }).validatedBody;
 
+/** Validates `request.query` against a Zod schema; stashes the parsed value for the handler. */
+export const zodQueryValidator =
+  <T>(schema: ZodType<T>) =>
+  async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    const parsed = schema.safeParse(request.query);
+    if (!parsed.success) {
+      await reply
+        .code(422)
+        .send(errorEnvelope('validation_failed', parsed.error.issues.map((i) => i.message).join('; ')));
+      return;
+    }
+    (request as FastifyRequest & { validatedQuery: T }).validatedQuery = parsed.data;
+  };
+
+/** Reads the value `zodQueryValidator` stashed on the request. */
+export const getValidatedQuery = <T>(request: FastifyRequest): T =>
+  (request as FastifyRequest & { validatedQuery: T }).validatedQuery;
+
 export const buildApp = async (deps: AppDeps) => {
   const app = Fastify({ loggerInstance: deps.logger });
 

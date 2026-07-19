@@ -10,12 +10,22 @@ import { createLogger } from './platform/logger.js';
 import { createDb } from './platform/db.js';
 import { systemClock } from './platform/clock.js';
 import { registerAuthRoutes } from './features/auth/auth.js';
+import { registerProblemsRoutes } from './features/problems/problems.js';
+import { registerDraftsRoutes } from './features/drafts/drafts.js';
+import { registerCreateSubmissionRoute } from './features/submissions/create.js';
+import { registerSubmissionDetailRoute } from './features/submissions/detail.js';
+import { createEnqueueClient, enqueueEvaluationJob } from './platform/queue.js';
 
 const config = loadConfig();
 const logger = createLogger({ level: config.nodeEnv === 'production' ? 'info' : 'debug' });
 const db = createDb(config.databaseUrl);
+const queue = await createEnqueueClient(config.databaseUrl);
 
 const app = await buildApp({ config, logger });
 registerAuthRoutes(app, { db, clock: systemClock, config });
+registerProblemsRoutes(app, { db });
+registerDraftsRoutes(app, { db, clock: systemClock });
+registerCreateSubmissionRoute(app, { db, clock: systemClock, enqueue: (payload) => enqueueEvaluationJob(queue, payload) });
+registerSubmissionDetailRoute(app, { db, clock: systemClock });
 
 await app.listen({ port: config.port, host: '0.0.0.0' });

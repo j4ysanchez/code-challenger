@@ -71,3 +71,11 @@ export const errorEnvelopeSchema = z.object({
 });
 
 export type ErrorEnvelope = z.infer<typeof errorEnvelopeSchema>;
+
+/** pg-boss queue names shared between the API (enqueue) and worker (consume). */
+export const EVALUATION_QUEUE_NAME = 'evaluate-submission';
+export const EVALUATION_DEAD_LETTER_QUEUE_NAME = 'evaluate-submission-dlq';
+
+export interface EvaluationJobPayload {
+  readonly submissionId: string;
+}

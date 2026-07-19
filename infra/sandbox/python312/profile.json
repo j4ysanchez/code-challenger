@@ -1,0 +1,15 @@
+{
+  "language": "python",
+  "version": "3.12",
+  "image": "sandbox-python312",
+  "sourceFilename": "main.py",
+  "compileCommand": ["python", "-m", "py_compile", "main.py"],
+  "runCommand": ["python", "main.py"],
+  "defaultLimits": {
+    "cpuTimeLimitMs": 2000,
+    "wallTimeLimitMs": 10000,
+    "memoryLimitMb": 256,
+    "pidsLimit": 64,
+    "outputCapBytes": 1048576
+  }
+}

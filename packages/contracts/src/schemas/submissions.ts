@@ -37,6 +37,8 @@ export const firstFailureSchema = z.discriminatedUnion('visible', [
     .strict(),
 ]);
 
+export type FirstFailure = z.infer<typeof firstFailureSchema>;
+
 export const submissionDetailSchema = z.object({
   id: uuidSchema,
   problemSlug: slugSchema,
@@ -52,6 +54,8 @@ export const submissionDetailSchema = z.object({
   sourceCode: codeSchema,
   firstFailure: firstFailureSchema.optional(),
 });
+
+export type SubmissionDetail = z.infer<typeof submissionDetailSchema>;
 
 export const submissionDetailResponseSchema = z.object({
   submission: submissionDetailSchema,

@@ -31,6 +31,10 @@ export default defineConfig({
           environment: 'node',
           setupFiles,
           passWithNoTests: true,
+          // solve-loop.e2e.test.ts drives real Docker sandbox containers; running it
+          // alongside the other (Postgres-only) api test files oversubscribes host
+          // CPU and makes its timing assertions flaky. Sequential files keep it stable.
+          fileParallelism: false,
         },
       },
       {

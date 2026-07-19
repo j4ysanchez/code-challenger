@@ -1,0 +1,15 @@
+{
+  "language": "javascript",
+  "version": "22",
+  "image": "sandbox-node22",
+  "sourceFilename": "main.js",
+  "compileCommand": ["node", "--check", "main.js"],
+  "runCommand": ["node", "main.js"],
+  "defaultLimits": {
+    "cpuTimeLimitMs": 2000,
+    "wallTimeLimitMs": 10000,
+    "memoryLimitMb": 256,
+    "pidsLimit": 64,
+    "outputCapBytes": 1048576
+  }
+}

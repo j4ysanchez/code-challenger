@@ -31,6 +31,8 @@ export const tagsSchema = z.array(z.string().max(32)).max(10);
 
 export const difficultySchema = z.enum(['easy', 'medium', 'hard']);
 
+export type Difficulty = z.infer<typeof difficultySchema>;
+
 /** Admin-configurable per-problem resource limits (data-model.md validation rules). */
 export const resourceLimitsSchema = z.object({
   cpuTimeLimitMs: z.number().int().min(100).max(10_000),

@@ -10,9 +10,14 @@
   },
   "dependencies": {
     "@code-challenger/contracts": "*",
+    "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/lang-python": "^6.2.1",
+    "@uiw/react-codemirror": "^4.25.11",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-router-dom": "^7.18.1"
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.18.1",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",

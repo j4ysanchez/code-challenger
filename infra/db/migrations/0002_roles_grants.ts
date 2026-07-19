@@ -1,4 +1,5 @@
 import { Kysely, sql } from 'kysely';
+import { getConstructionPlans } from 'pg-boss';
 import { assertSafeIdentifier, dbEnv, escapeLiteral, roleName, rolePassword } from '../env.js';
 
 const ensureRole = async (db: Kysely<unknown>, role: string, password: string): Promise<void> => {
@@ -40,11 +41,15 @@ export const up = async (db: Kysely<unknown>): Promise<void> => {
   await sql.raw(`GRANT SELECT, INSERT ON audit_events TO ${workerRole};`).execute(db);
 
   // pg-boss's own job-queue schema: enqueue for api_role, consume/complete for worker_role.
-  // pg-boss creates/migrates its own tables on first start, so both roles need CREATE here.
   await sql.raw(`CREATE SCHEMA IF NOT EXISTS pgboss;`).execute(db);
   await sql.raw(`GRANT USAGE, CREATE ON SCHEMA pgboss TO ${apiRole}, ${workerRole};`).execute(db);
+  // Default privileges only cover objects THIS role (migrator) creates from here on — so we
+  // create pg-boss's schema ourselves, right now, as migrator, instead of leaving it to whichever
+  // of api/worker happens to call `boss.start()` first. Otherwise that service's role would own
+  // the tables and the other service would get "permission denied" (both need to enqueue/consume).
   await sql.raw(`ALTER DEFAULT PRIVILEGES IN SCHEMA pgboss GRANT ALL ON TABLES TO ${apiRole}, ${workerRole};`).execute(db);
   await sql.raw(`ALTER DEFAULT PRIVILEGES IN SCHEMA pgboss GRANT ALL ON SEQUENCES TO ${apiRole}, ${workerRole};`).execute(db);
+  await sql.raw(getConstructionPlans('pgboss')).execute(db);
 };
 
 export const down = async (db: Kysely<unknown>): Promise<void> => {

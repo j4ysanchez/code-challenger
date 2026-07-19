@@ -15,6 +15,7 @@ export class ApiError extends Error {
 export interface ApiRequestOptions {
   readonly method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   readonly body?: unknown;
+  readonly signal?: AbortSignal;
 }
 
 interface ErrorEnvelopeLike {
@@ -31,6 +32,7 @@ export const apiFetch = async <T>(
   const response = await fetch(`/api${path}`, {
     method: options.method ?? 'GET',
     credentials: 'include',
+    ...(options.signal ? { signal: options.signal } : {}),
     ...(hasBody
       ? { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(options.body) }
       : {}),

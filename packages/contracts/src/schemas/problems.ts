@@ -19,6 +19,8 @@ export const problemSummarySchema = z.object({
   solved: z.boolean().optional(),
 });
 
+export type ProblemSummary = z.infer<typeof problemSummarySchema>;
+
 export const problemsListQuerySchema = z.object({
   difficulty: difficultySchema.optional(),
   tag: z.string().max(32).optional(),
@@ -47,6 +49,9 @@ export const problemDetailSchema = z.object({
   visibleTestCases: z.array(visibleTestCaseSchema),
   solved: z.boolean().optional(),
 });
+
+export type ProblemDetail = z.infer<typeof problemDetailSchema>;
+export type VisibleTestCase = z.infer<typeof visibleTestCaseSchema>;
 
 export const problemDetailResponseSchema = z.object({
   problem: problemDetailSchema,

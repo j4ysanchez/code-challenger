@@ -6,9 +6,18 @@
   "main": "dist/index.js",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "dev": "node -e \"console.log('apps/worker dev process not implemented yet (see tasks.md Phase 2/3)')\""
+    "dev": "tsx watch src/index.ts"
   },
   "dependencies": {
-    "@code-challenger/contracts": "*"
+    "@code-challenger/contracts": "*",
+    "dockerode": "^5.0.1",
+    "kysely": "^0.29.4",
+    "pg": "^8.22.0",
+    "pg-boss": "^12.26.1",
+    "pino": "^10.3.1"
+  },
+  "devDependencies": {
+    "@types/dockerode": "^4.0.1",
+    "@types/pg": "^8.20.0"
   }
 }
