@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { sql } from 'kysely';
 import { PgBoss } from 'pg-boss';
 import { afterAll, describe, expect, it } from 'vitest';
-import { EVALUATION_QUEUE_NAME, type EvaluationJobPayload } from '@code-challenger/contracts';
+import type { EvaluationJobPayload } from '@code-challenger/contracts';
 import { createDb } from '../src/platform/db.js';
 import { writeAuditEvent } from '../src/platform/audit.js';
 import { RETRY_LIMIT, WORKER_CONCURRENCY, createEvaluationQueue, subscribeEvaluationJobs } from '../src/platform/queue.js';
@@ -59,15 +59,24 @@ describe('writeAuditEvent', () => {
 
 describe('evaluation queue', () => {
   it('delivers an enqueued job to the subscribed handler', async () => {
-    const boss = await createEvaluationQueue(requireEnv('DATABASE_URL_WORKER'));
+    // A unique queue name — never the shared production EVALUATION_QUEUE_NAME — so this
+    // test can't race a live `dev:worker` process for the job (see sibling dead-letter
+    // test below for the same pattern).
+    const testQueue = `test-evaluate-${randomUUID()}`;
+    const testDeadLetter = `${testQueue}-dlq`;
+    const boss = await createEvaluationQueue(requireEnv('DATABASE_URL_WORKER'), testQueue, testDeadLetter);
     try {
       const received: EvaluationJobPayload[] = [];
-      await subscribeEvaluationJobs(boss, async (payload) => {
-        received.push(payload);
-      });
+      await subscribeEvaluationJobs(
+        boss,
+        async (payload) => {
+          received.push(payload);
+        },
+        testQueue,
+      );
 
       const submissionId = randomUUID();
-      await boss.send(EVALUATION_QUEUE_NAME, { submissionId } satisfies EvaluationJobPayload);
+      await boss.send(testQueue, { submissionId } satisfies EvaluationJobPayload);
 
       await expect
         .poll(() => received.some((job) => job.submissionId === submissionId), { timeout: 5000, interval: 100 })

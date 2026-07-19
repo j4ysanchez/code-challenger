@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import CodeMirror from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 import { javascript } from '@codemirror/lang-javascript';
@@ -161,9 +161,12 @@ export const ProblemPage = (): React.JSX.Element => {
       <CodeMirror value={code} extensions={editorExtensions(language)} onChange={setCode} />
 
       {user ? (
-        <button type="button" onClick={() => void handleSubmit()} disabled={submitting}>
-          {submitting ? 'Submitting…' : 'Submit'}
-        </button>
+        <>
+          <button type="button" onClick={() => void handleSubmit()} disabled={submitting}>
+            {submitting ? 'Submitting…' : 'Submit'}
+          </button>
+          <Link to={`/problems/${slug}/history`}>View my submission history</Link>
+        </>
       ) : (
         <p>Sign in to submit a solution.</p>
       )}

@@ -123,6 +123,20 @@ export const revokeSession = async (db: Kysely<Database>, request: FastifyReques
   }
 };
 
+/** Attaches the session user if present and valid; never denies — for public routes with an authenticated variant. */
+export const optionalSession =
+  (db: Kysely<Database>, clock: Clock) =>
+  async (request: FastifyRequest): Promise<void> => {
+    const sessionId = sessionIdFromRequest(request);
+    if (!sessionId) {
+      return;
+    }
+    const result = await lookupSession(db, sessionId, clock);
+    if (result.ok) {
+      (request as FastifyRequest & { user: SessionUser }).user = result.value.user;
+    }
+  };
+
 /** requireMember first (401 for anonymous), then an admin-role check (403 for authenticated non-admins). */
 export const requireAdmin =
   (db: Kysely<Database>, clock: Clock) =>

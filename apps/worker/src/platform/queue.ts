@@ -10,17 +10,25 @@ export const RETRY_LIMIT = 2;
  * Starts pg-boss against the `worker_role` connection and ensures both the
  * evaluation queue and its dead-letter queue exist (idempotent — safe to call
  * from both api and worker at startup).
+ *
+ * `queueName`/`deadLetterName` default to the real production queues; tests
+ * override them with a unique name so they never race a live worker process
+ * subscribed to the shared production queue.
  */
-export const createEvaluationQueue = async (connectionString: string): Promise<PgBoss> => {
+export const createEvaluationQueue = async (
+  connectionString: string,
+  queueName: string = EVALUATION_QUEUE_NAME,
+  deadLetterName: string = EVALUATION_DEAD_LETTER_QUEUE_NAME,
+): Promise<PgBoss> => {
   // The `pgboss` schema is created by infra/db/migrations/0002_roles_grants.ts (as migrator_role);
   // api_role/worker_role only have CREATE *within* it, not CREATE ON DATABASE, which
   // `CREATE SCHEMA IF NOT EXISTS` requires even when the schema already exists.
   const boss = new PgBoss({ connectionString, schema: 'pgboss', createSchema: false });
   await boss.start();
-  await boss.createQueue(EVALUATION_DEAD_LETTER_QUEUE_NAME);
-  await boss.createQueue(EVALUATION_QUEUE_NAME, {
+  await boss.createQueue(deadLetterName);
+  await boss.createQueue(queueName, {
     retryLimit: RETRY_LIMIT,
-    deadLetter: EVALUATION_DEAD_LETTER_QUEUE_NAME,
+    deadLetter: deadLetterName,
   });
   return boss;
 };
@@ -29,9 +37,10 @@ export const createEvaluationQueue = async (connectionString: string): Promise<P
 export const subscribeEvaluationJobs = async (
   boss: PgBoss,
   handleJob: (payload: EvaluationJobPayload) => Promise<void>,
+  queueName: string = EVALUATION_QUEUE_NAME,
 ): Promise<string> =>
   boss.work<EvaluationJobPayload>(
-    EVALUATION_QUEUE_NAME,
+    queueName,
     { batchSize: 1, localConcurrency: WORKER_CONCURRENCY },
     async (jobs) => {
       for (const job of jobs) {

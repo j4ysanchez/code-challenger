@@ -71,6 +71,8 @@ export const submissionSummarySchema = z.object({
   createdAt: isoDateSchema,
 });
 
+export type SubmissionSummary = z.infer<typeof submissionSummarySchema>;
+
 export const submissionsHistoryResponseSchema = z.object({
   submissions: z.array(submissionSummarySchema),
 });

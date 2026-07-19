@@ -5,6 +5,7 @@ import {
   clearSessionCookie,
   createSession,
   lookupSession,
+  optionalSession,
   requireAdmin,
   requireMember,
   setSessionCookie,
@@ -217,5 +218,49 @@ describe('requireMember / requireAdmin preHandlers', () => {
     const { app } = await buildTestApp();
     const response = await app.inject({ method: 'GET', url: '/__test/admin-only' });
     expect(response.statusCode).toBe(401);
+  });
+});
+
+describe('optionalSession preHandler', () => {
+  const buildTestApp = async () => {
+    const app = await buildApp({ config: testConfig, logger: createLogger({ level: 'silent' }) });
+    const clock = new FakeClock(new Date());
+    app.get('/__test/optional', { preHandler: optionalSession(db, clock) }, async (request) => ({
+      user: (request as typeof request & { user?: unknown }).user ?? null,
+    }));
+    return { app, clock };
+  };
+
+  it('leaves the request anonymous (never 401) with no session cookie', async () => {
+    const { app } = await buildTestApp();
+    const response = await app.inject({ method: 'GET', url: '/__test/optional' });
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ user: null });
+  });
+
+  it('attaches the user for a valid session cookie', async () => {
+    const { app, clock } = await buildTestApp();
+    const user = await createTestUser(db, 'member');
+    const session = await createSession(db, user.id, clock);
+    const signed = app.signCookie(session.id);
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/__test/optional',
+      headers: { cookie: `${SESSION_COOKIE_NAME}=${signed}` },
+    });
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ user: { id: user.id, email: user.email, role: 'member' } });
+  });
+
+  it('leaves the request anonymous (never 401) for an invalid/tampered cookie', async () => {
+    const { app } = await buildTestApp();
+    const response = await app.inject({
+      method: 'GET',
+      url: '/__test/optional',
+      headers: { cookie: `${SESSION_COOKIE_NAME}=not-a-signed-value` },
+    });
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ user: null });
   });
 });
