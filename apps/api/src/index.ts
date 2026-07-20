@@ -16,6 +16,8 @@ import { registerDraftsRoutes } from './features/drafts/drafts.js';
 import { registerCreateSubmissionRoute } from './features/submissions/create.js';
 import { registerSubmissionDetailRoute } from './features/submissions/detail.js';
 import { registerHistoryRoute } from './features/submissions/history.js';
+import { registerAdminProblemsRoutes } from './features/admin-problems/admin-problems.js';
+import { registerPublishRoutes } from './features/admin-problems/publish.js';
 import { createEnqueueClient, enqueueEvaluationJob } from './platform/queue.js';
 
 const config = loadConfig();
@@ -31,5 +33,7 @@ registerDraftsRoutes(app, { db, clock: systemClock });
 registerCreateSubmissionRoute(app, { db, clock: systemClock, enqueue: (payload) => enqueueEvaluationJob(queue, payload) });
 registerSubmissionDetailRoute(app, { db, clock: systemClock });
 registerHistoryRoute(app, { db, clock: systemClock });
+registerAdminProblemsRoutes(app, { db, clock: systemClock });
+registerPublishRoutes(app, { db, clock: systemClock });
 
 await app.listen({ port: config.port, host: '0.0.0.0' });

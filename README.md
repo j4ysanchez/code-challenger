@@ -39,26 +39,15 @@ npm run dev:worker   # evaluation worker (needs the Docker socket)
 npm run dev:web      # Vite dev server on :5173, proxying /api → :3000
 ```
 
-Open **http://localhost:5173**.
+Open **http://localhost:5173** and either **Register** a new account or **Log in**
+with one of the seeded logins above. Open a problem, edit the code, and hit
+**Submit**. Signed-in users also get draft autosave, submission history, and
+solved-status badges in the catalog.
 
-There's no register/login page in the UI yet, so get a session cookie from the browser
-devtools console on `localhost:5173` for now:
-
-```js
-await fetch('/api/auth/register', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json', Origin: location.origin },
-  body: JSON.stringify({ email: 'you@example.com', password: 'a-fine-password' }),
-});
-await fetch('/api/auth/login', {
-  method: 'POST',
-  credentials: 'include',
-  headers: { 'Content-Type': 'application/json', Origin: location.origin },
-  body: JSON.stringify({ email: 'you@example.com', password: 'a-fine-password' }),
-});
-```
-
-Reload the page, open a seeded problem, edit the code, and hit **Submit**.
+Log in as the seeded admin to author problems: click **Admin** in the nav to create
+a draft problem, add visible/hidden test cases, and publish it — see
+[specs/001-code-challenge-platform/quickstart.md](specs/001-code-challenge-platform/quickstart.md)
+for the full manual walkthrough of each user story.
 
 ## Validation
 
@@ -75,14 +64,25 @@ a bounded completion time, and that no sandbox container is left running afterwa
 
 ## Current status
 
-**User Story 1 (solve loop) is complete and demoable**: catalog with difficulty/tag
-filters, problem page with a CodeMirror editor (Python/JavaScript) and debounced draft
-autosave, and submit → real sandboxed execution → verdict (accepted / wrong_answer /
-time_limit_exceeded / memory_limit_exceeded / runtime_error / compile_error) with
-first-failing-case detail. See
-[specs/001-code-challenge-platform/checklists/us1-validation.md](specs/001-code-challenge-platform/checklists/us1-validation.md)
-for the checkpoint validation record.
+All three user stories are complete and demoable:
 
-Not yet built: register/login/password-reset pages, submission history, solved-status
-badges, and problem authoring/admin UI (Phases 4–5 of
-[tasks.md](specs/001-code-challenge-platform/tasks.md)).
+- **User Story 1 — Solve a problem**: catalog with difficulty/tag filters, problem
+  page with a CodeMirror editor (Python/JavaScript) and debounced draft autosave, and
+  submit → real sandboxed execution → verdict (accepted / wrong_answer /
+  time_limit_exceeded / memory_limit_exceeded / runtime_error / compile_error) with
+  first-failing-case detail. See
+  [us1-validation.md](specs/001-code-challenge-platform/checklists/us1-validation.md).
+- **User Story 2 — Account & submission history**: register/login/logout,
+  password reset (request/confirm), per-problem submission history, and
+  solved-status checkmarks in the catalog, with strict cross-user ownership
+  isolation on every submission/draft/history read. See
+  [us2-validation.md](specs/001-code-challenge-platform/checklists/us2-validation.md).
+- **User Story 3 — Problem authoring & administration**: admin-only UI to create
+  draft problems, edit their statement/difficulty/tags/limits/starter code, manage
+  visible and hidden test cases, and publish/unpublish — drafts stay invisible to
+  non-admins until published. See
+  [us3-validation.md](specs/001-code-challenge-platform/checklists/us3-validation.md).
+
+Remaining: Phase 6 polish — production Docker Compose profile + Caddy TLS front,
+an audit/rate-limit verification test, a concurrency load check, and the GCP
+Compute Engine deploy (see [tasks.md](specs/001-code-challenge-platform/tasks.md)).

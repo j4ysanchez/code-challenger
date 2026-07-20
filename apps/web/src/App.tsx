@@ -11,6 +11,8 @@ import { LoginPage } from './features/auth/LoginPage.js';
 import { ResetPage } from './features/auth/ResetPage.js';
 import { HistoryPage } from './features/submissions/HistoryPage.js';
 import { ProfilePage } from './features/profile/ProfilePage.js';
+import { AdminProblemsPage } from './features/admin/AdminProblemsPage.js';
+import { ProblemForm } from './features/admin/ProblemForm.js';
 
 const Nav = (): React.JSX.Element => {
   const user = useSession();
@@ -28,6 +30,7 @@ const Nav = (): React.JSX.Element => {
       {user ? (
         <>
           <Link to="/profile">{user.email}</Link>
+          {user.role === 'admin' ? <Link to="/admin">Admin</Link> : null}
           <button type="button" onClick={() => void handleLogout()}>
             Log out
           </button>
@@ -72,6 +75,9 @@ const App = (): React.JSX.Element => {
         <Route path="/reset" element={<ResetPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/problems/:slug/history" element={<HistoryPage />} />
+        <Route path="/admin" element={<AdminProblemsPage />} />
+        <Route path="/admin/new" element={<ProblemForm />} />
+        <Route path="/admin/:id" element={<ProblemForm />} />
       </Routes>
     </BrowserRouter>
   );

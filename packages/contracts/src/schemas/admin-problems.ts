@@ -21,7 +21,11 @@ export const createProblemRequestSchema = z.object({
   starterCode: starterCodeSchema,
 });
 
+export type CreateProblemRequest = z.infer<typeof createProblemRequestSchema>;
+
 export const patchProblemRequestSchema = createProblemRequestSchema.partial();
+
+export type PatchProblemRequest = z.infer<typeof patchProblemRequestSchema>;
 
 export const adminProblemSchema = z.object({
   id: uuidSchema,
@@ -34,6 +38,8 @@ export const adminProblemSchema = z.object({
   limits: resourceLimitsSchema,
   starterCode: starterCodeSchema,
 });
+
+export type AdminProblem = z.infer<typeof adminProblemSchema>;
 
 export const adminProblemResponseSchema = z.object({
   problem: adminProblemSchema,
@@ -48,6 +54,8 @@ export const testCaseInputSchema = z.object({
   expectedOutput: testCaseTextSchema,
   visible: z.boolean(),
 });
+
+export type TestCaseInput = z.infer<typeof testCaseInputSchema>;
 
 export const replaceTestCasesRequestSchema = z.object({
   testCases: z.array(testCaseInputSchema).min(1),
