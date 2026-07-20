@@ -44,10 +44,43 @@ with one of the seeded logins above. Open a problem, edit the code, and hit
 **Submit**. Signed-in users also get draft autosave, submission history, and
 solved-status badges in the catalog.
 
-Log in as the seeded admin to author problems: click **Admin** in the nav to create
-a draft problem, add visible/hidden test cases, and publish it — see
+Log in as the seeded admin to author problems — see **Authoring a problem** below.
+
+## Authoring a problem
+
+Draft, test, and publish a new problem entirely through the admin UI:
+
+1. Log in as `admin@example.com` / `admin-seed-pw` (or any account with the `admin`
+   role). An **Admin** link appears in the nav.
+2. Click **Admin**, then **New problem**. Fill in the form and click **Save**:
+   - **Slug** — URL-safe id, e.g. `two-sum` (kebab-case, must be unique)
+   - **Title**, **Statement (Markdown)**, **Difficulty**, **Tags** (comma-separated)
+   - **CPU/wall time limit** and **memory limit** — defaults (2000 ms / 10000 ms /
+     256 MB) are fine for most problems
+   - **Python starter code** / **JavaScript starter code** — what solvers see
+     pre-filled in the editor
+   - Saving creates the problem with `status: draft` and takes you to its edit page.
+3. On the edit page, use the **Test cases** section to add at least one **visible**
+   case (shown to solvers, and revealed on a failing submission) and at least one
+   **hidden** case (used for grading, never shown). Fill **Input** / **Expected
+   output** per case, toggle **Visible** off for hidden cases, use **Add test case**
+   for more rows, then click **Save test cases** — this fully replaces the problem's
+   test cases each time.
+4. A draft is invisible in the public catalog and its detail page 404s for everyone
+   but admins. Back on **Admin**, click **Publish** on the problem's row once you
+   have ≥1 visible and ≥1 hidden case — publishing fails with a 422 otherwise. The
+   row updates to `published` and the problem now appears in the catalog and is
+   solvable end-to-end.
+5. **Unpublish** on the same row reverts it to `draft`, hiding it again without
+   deleting its test cases or starter code.
+
+Only admins can reach `/api/admin/*` — a member gets 403, an anonymous caller gets
+401. See
+[checklists/us3-validation.md](specs/001-code-challenge-platform/checklists/us3-validation.md)
+for a full end-to-end run of this workflow (including the isolation checks above),
+and
 [specs/001-code-challenge-platform/quickstart.md](specs/001-code-challenge-platform/quickstart.md)
-for the full manual walkthrough of each user story.
+for the manual scenarios covering every user story.
 
 ## Validation
 
